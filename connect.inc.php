@@ -1,10 +1,10 @@
 <?php
 
 	//vars
-		$host = "localhost";
-		$username = "root";
-		$password = "void0on0";
-		$database = "Data";
+		$host = "";
+		$username = "";
+		$password = "";
+		$database = "";
 		
 		$table_weights = "weights";
 		$table_cardio = "cardio";
