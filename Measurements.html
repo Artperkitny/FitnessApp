@@ -1,0 +1,330 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Foundation | Welcome</title>
+    <link rel="stylesheet" href="css/foundation.css" />
+	<link rel="stylesheet" href="css/app.css">
+    <script src="js/vendor/modernizr.js"></script>
+	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script type="text/javascript">
+	
+		$(document).ready(function(){
+			$.ajax({
+				url: "Get_Workouts.php",
+				success: function(result){
+					$("#workout").html(result);
+				}
+			});
+		});
+		
+		$(document).on("click","#submit",function(){
+			if($('#table th').length==5){
+				$("table td").attr("contenteditable","false");
+				$('#table tr').find('th:last, td:last').remove();
+				$("#edit_off").html("Edit Table");
+				$("#edit_off").attr("id","edit_on");
+			};
+			var workout = $("#workout").val();
+			if(workout==null){
+				$("#alert").removeClass();
+				$("#alert").addClass("alert-box warning");
+				$("#alert").slideDown("fast","swing");
+				$("#alert span").html("Please select workout before subbmiting");
+				$("#workout").fadeIn("slow").fadeOut("slow").fadeIn("slow").fadeOut("slow").fadeIn("slow");
+				$("#alert").delay(3000).slideUp("fast","swing");
+				return;
+			}
+			var timestamp = $.now()/1000;
+			var set = $("#set").val();
+			var weight =$("#weight").val();
+			if(weight==""){
+				weight = 0;
+			}
+			var rep = $("#rep").val();
+			if(rep==""){
+				rep = 0;
+			}
+			var table = "<tr><td>"+workout+"</td><td>"+set+"</td><td>"+weight+"</td><td>"+rep+"</td><td style='display:none'>"+timestamp+"</td></tr>";
+			$("#table tbody").prepend(table);
+			
+			$("#weight").val("");
+			$("#rep").val("");
+			$("#set").val(parseInt(set)+1)
+		});
+		
+		$(document).on("change","#workout",function(){
+			$("#set").val(1);
+		});
+		
+		$(document).on("click","#edit_on",function(){
+			$("table td").attr("contenteditable","true");
+			$("#table thead tr").append("<th width='100'></th>");
+			$("#table tr:gt(0)").append("<td><a id='remove'>Remove</a></td>");
+			$("#edit_on").html("Edit Done");
+			$("#edit_on").attr("id","edit_off");
+		});
+		
+		$(document).on("click","#edit_off",function(){
+			$("table td").attr("contenteditable","false");
+			$('#table tr').find('th:last, td:last').remove();
+			$("#edit_off").html("Edit Table");
+			$("#edit_off").attr("id","edit_on");
+		});
+		
+		$(document).on("click","#hide_on",function(){
+			$("table").hide();
+			$("#hide_on").html("Show Table");
+			$("#hide_on").attr("id","hide_off");
+		});
+		
+		$(document).on("click","#hide_off",function(){
+			$("table").show();
+			$("#hide_off").html("Hide Table");
+			$("#hide_off").attr("id","hide_on");
+		});
+		
+		$(document).on("click","#remove",function(){
+			$(this).closest('tr').remove();
+		});
+		
+		$(document).on("click","#finalize",function(){
+			$("#finalize").prop("disabled",true);
+			if($('#table th').length==5){
+				$("table td").attr("contenteditable","false");
+				$('#table tr').find('th:last, td:last').remove();
+				$("#edit_off").html("Edit Table");
+				$("#edit_off").attr("id","edit_on");
+			};
+			
+			i=0;
+			var result = [];
+			$('#table td').each(function() {
+				result[i] = $(this).html();
+				i+=1;	
+			});
+
+			$.ajax({
+				url: "Weight.php",
+				data: {result:JSON.stringify(result)},
+				success: function(){
+					$("#alert").removeClass();
+					$("#alert").addClass("alert-box success");
+					$("#table tbody").empty();
+					$("#weight").val("");
+					$("#rep").val("");
+					$("#set").val(0)
+					$("#workout").val(null)
+					$("#finalize").prop("disabled",false);
+					$("#alert").slideDown("fast","swing");
+					$("#alert span").html("Data subbmited successfully");
+					$("#alert").delay(3000).slideUp("fast","swing");
+				}
+			})
+		});
+		
+		window.onbeforeunload = function(){
+			if(!window.btn_clicked && $('#table td').length>0){
+				return 'If you leave now, yor unsaved results will be lost!';
+			}
+		};
+		
+	</script>
+  </head>
+  <body>
+  
+    <div class="off-canvas-wrap" data-offcanvas>
+	  <div class="inner-wrap">
+		<nav class="tab-bar">
+		  <section class="left-small">
+			<a class="left-off-canvas-toggle menu-icon" href="#"><span></span></a>
+		  </section>
+
+		  <section class="middle tab-bar-section">
+			<h1 class="title">Workout App</h1>
+		  </section>
+		  
+		</nav>
+		
+		<aside class="left-off-canvas-menu">
+			<ul class="off-canvas-list">
+				<li><label>Menu</label></li>
+				<li><a href="/Fitness">Home</a></li>
+				<li><a href="#"></a></li>
+			</ul>
+		</aside>
+		
+		<section class="main-section">
+			<div class="row">
+			  <div class="small-12 columns">
+				<hr>	
+					<div id='alert' style='display:none' data-alert>
+						<span></span>
+					</div>
+			</div>
+			
+			<div class="small-6 columns">
+				<label>Left Arm
+					<input id="Arm_Left" type="number" step="1" value="1"/>
+				</label>  
+			</div>
+					
+			<div class="small-6 columns">
+				<label>Right Arm
+					<input id="Arm_Right" type="number" step="1" value="1"/>
+				</label>  
+			</div>
+			
+			<div class="small-6 columns">
+				<label>Left Forearm
+					<input id="Forearm_Left" type="number" step="1" value="1"/>
+				</label>  
+			</div>
+					
+			<div class="small-6 columns">
+				<label>Right Forearm
+					<input id="Forearm_Right" type="number" step="1" value="1"/>
+				</label>  
+			</div>
+			
+			<div class="small-6 columns">
+				<label>Neck
+					<input id="Neck" type="number" step="1" value="1"/>
+				</label>  
+			</div>
+					
+			<div class="small-6 columns">
+				<label>Chest
+					<input id="Chest" type="number" step="1" value="1"/>
+				</label>  
+			</div>
+			
+			<div class="small-6 columns">
+				<label>Waist
+					<input id="Waist" type="number" step="1" value="1"/>
+				</label>  
+			</div>
+					
+			<div class="small-6 columns">
+				<label>Hip
+					<input id="Hip" type="number" step="1" value="1"/>
+				</label>  
+			</div>
+			
+			<div class="small-6 columns">
+				<label>Left Thigh
+					<input id="Thigh_Left" type="number" step="1" value="1"/>
+				</label>  
+			</div>
+					
+			<div class="small-6 columns">
+				<label>Right Thigh 
+					<input id="Thigh_Right" type="number" step="1" value="1"/>
+				</label>  
+			</div>
+			
+			<div class="small-6 columns">
+				<label>Left Calve
+					<input id="Calve_Left" type="number" step="1" value="1"/>
+				</label>  
+			</div>
+					
+			<div class="small-6 columns">
+				<label>Right Calve 
+					<input id="Calve_Right" type="number" step="1" value="1"/>
+				</label>  
+			</div>
+			
+			<div class="small-6 columns">
+				<label>Weight (lbs)
+					<input id="Weight" type="number" step="1" value="1"/>
+				</label>  
+			</div>
+					
+			<div class="small-6 columns">
+				<label>Body Fat %
+					<input id="BodyFat" type="number" step="1" value="1"/>
+				</label>  
+			</div>
+			
+			  <hr>
+			  
+			  <div class="small-12 columns">
+				<a class="button expand" id="submit">Submit</a>
+			  </div>
+			  
+			  <table id="table">
+				<tr>
+				  <th width="300" id="Chest">Chest</th>
+				  <td width="300" id="Chest"></td>
+				 </tr>
+				  <th width="300" id="Waist">Waist</th>
+				  <td width="300" id="Waist"></td>
+				 </tr>
+				  <th width="300" id="Hip">Hip</th>
+				  <td width="300" id="Hip"></td>
+				 </tr> 
+				  <th width="300" id="Arm">Right Arm</th>
+				  <td width="300" id="Arm"></td>
+				 </tr>
+				  <th width="300" id="Arm">Left Arm</th>
+				  <td width="300" id="Arm"></td>
+				 </tr> 
+				   <th width="300" id="Forearm">Right Forearm</th>
+				  <td width="300" id="Forearm"></td>
+				 </tr>
+				  <th width="300" id="Forearm">Left Forearm</th>
+				  <td width="300" id="Forearm"></td>
+				 </tr> 
+				  <th width="300" id="Thigh">Right Thigh</th>
+				  <td width="300" id="Thigh"></td>
+				 </tr>
+				  <th width="300" id="Thigh">Left Thigh</th>
+				  <td width="300" id="Thigh"></td>
+				 </tr>
+				  <th width="300" id="Calve">Right Calve</th>
+				  <td width="300" id="Calve"></td>
+				 </tr>
+				  <th width="300" id="Calve">Left Calve</th>
+				  <td width="300" id="Calve"></td>
+				 </tr>
+				  <th width="300" id="Neck">Neck</th>
+				  <td width="300" id="Neck"></td>
+				 </tr> 
+				  <th width="300" id="Weight">Weight</th>
+				  <td width="300" id="Weight"></td>
+				 </tr> 
+				  <th width="300" id="BodyFat">Body Fat %</th>
+				  <td width="300" id="BodyFat"></td>
+				</tr>
+			  </table>
+			  
+			  <div class="small-6 columns">
+				<a class="button expand" id="edit_on">Edit Table</a>
+			  </div> 
+			  <div class="small-6 columns">
+				<a class="button expand" id="hide_on">Hide Table</a>
+			  </div>
+			  
+			  <hr>
+			  
+			  <div class="small-12 columns">
+				<a class="button expand" id="finalize">Finalize</a>
+			  </div>
+			  
+			</div>
+		</section>
+	   <a class="exit-off-canvas"></a>
+
+	  </div>
+	</div>
+    
+    <script src="js/vendor/jquery.js"></script>
+    <script src="js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+    </script>
+  </body>
+</html>
